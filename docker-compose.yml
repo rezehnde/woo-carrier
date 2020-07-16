@@ -1,8 +1,8 @@
 version: '3.3'
 
 services:
-  db:
-    container_name: 'local-wordpress-db'
+  mysql:
+    container_name: 'mysql'
     image: 'mysql:5.7'
     ports:
       - 18766:3306
@@ -12,15 +12,28 @@ services:
       MYSQL_USER: wordpress_user
       MYSQL_PASSWORD: wordpress_password
 
-  wordpress:
-    container_name: local-wordpress
+  phpmyadmin:
+    container_name: 'phpmyadmin'
     depends_on:
-      - db
+      - mysql
+    image: 'phpmyadmin/phpmyadmin:latest'
+    ports:
+      - '8080:80'
+    restart: always
+    environment:
+      PMA_HOST: 'mysql:3306'
+      PMA_USER: wordpress_user
+      PMA_PASSWORD: wordpress_password
+
+  wordpress:
+    container_name: wordpress
+    depends_on:
+      - mysql
     image: 'wordpress:latest'
     ports:
-      - '80:80'
+      - '8000:80'
     environment:
-      WORDPRESS_DB_HOST: 'db:3306'
+      WORDPRESS_DB_HOST: 'mysql:3306'
       WORDPRESS_DB_USER: wordpress_user
       WORDPRESS_DB_PASSWORD: wordpress_password
       WORDPRESS_DB_NAME: wordpress_db
